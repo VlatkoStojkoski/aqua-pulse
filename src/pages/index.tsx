@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import Head from "next/head";
 import mapboxgl, { type Map } from 'mapbox-gl';
 
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiZGFpc2hvYXJjaCIsImEiOiJjbG13OW5keWMwOTRtMmtsMnN1YmtobmdtIn0.X1iVg56KI3O6tbUYFJmd5Q'
 
 export default function Home() {
