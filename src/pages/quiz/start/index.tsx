@@ -18,20 +18,22 @@ export default function QuizStartPage() {
 					Solve Quiz
 				</Link>
 				<h2 className="text-white text-2xl font-extrabold">Or...</h2>
-				<input
-					type="text"
-					placeholder="Room Code"
-					value={roomCode}
-					onChange={(ev) => setRoomCode(ev.target.value)}
-					className="py-3 px-3 w-full rounded-md"
-				/>
-				<div className="grid grid-cols-2 gap-3 w-full">
-					<Link href={`/quiz/${roomCode}?q=0`} className="py-2 px-3 w-full bg-primary text-white font-bold rounded-md">
-						Join Room
-					</Link>
-					<Link href={`/quiz/${roomCode}?q=0`} className="py-2 px-3 w-full font-bold rounded-md bg-neutral-200">
-						Create Room
-					</Link>
+				<div className="flex flex-col w-full gap-3">
+					<input
+						type="text"
+						placeholder="Room Code"
+						value={roomCode}
+						onChange={(ev) => setRoomCode(ev.target.value)}
+						className="h-14 py-3 px-3 w-full rounded-md"
+					/>
+					<div className="grid grid-cols-2 gap-3 w-full">
+						<Link href={`/quiz/${roomCode}?q=0`} className="flex items-center justify-center h-14 w-full bg-primary text-white font-bold rounded-md">
+							Join Room
+						</Link>
+						<Link href={`/quiz/${roomCode}?q=0`} className="flex items-center justify-center h-14 w-full font-bold rounded-md bg-neutral-200">
+							Create Room
+						</Link>
+					</div>
 				</div>
 			</div>
 		</div>

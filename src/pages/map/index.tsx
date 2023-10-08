@@ -1,27 +1,45 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Head from "next/head";
 import mapboxgl, { type Map } from 'mapbox-gl';
+import ReactMapGL, { type MapRef, Marker, Layer, Source } from 'react-map-gl';
+import type {CircleLayer} from 'react-map-gl';
+import Image from 'next/image';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiZGFpc2hvYXJjaCIsImEiOiJjbG13OW5keWMwOTRtMmtsMnN1YmtobmdtIn0.X1iVg56KI3O6tbUYFJmd5Q'
+function getRandomInRange(from: number, to: number, fixed: number) {
+	return +(Math.random() * (to - from) + from).toFixed(fixed)
+}
+
+function randomLngLat() {
+	return [getRandomInRange(-180, 180, 3), getRandomInRange(-90, 90, 3)]
+}
+
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZGFpc2hvYXJjaCIsImEiOiJjbG13OW5keWMwOTRtMmtsMnN1YmtobmdtIn0.X1iVg56KI3O6tbUYFJmd5Q'
+
+const CustomMarker = ({index, marker}: {
+	index: number,
+	marker: {
+		longitude: number,
+		latitude: number
+	}
+}) => {
+  return (
+    <Marker
+      longitude={marker.longitude}
+      latitude={marker.latitude}>
+      <div className="marker">
+        <span><b>{index + 1}</b></span>
+      </div>
+    </Marker>
+  )
+};
 
 export default function MapPage() {
-	const mapContainer = useRef<HTMLDivElement>(null);
-	const map = useRef<Map | null>(null);
+	const map = useRef<MapRef | null>(null);
+	const [layer1Visible, setLayer1Visible] = useState(true);
+	const [layer2Visible, setLayer2Visible] = useState(false);
 	const [lng, setLng] = useState(-95.0992011);
 	const [lat, setLat] = useState(29.5555885);
 
-	useEffect(() => {
-		if (map.current ?? !mapContainer.current) return; // initialize map only once
-		map.current = new mapboxgl.Map({
-			container: mapContainer.current,
-			projection: {
-				name: 'globe'
-			},
-			style: 'mapbox://styles/daishoarch/clnd12ewv000w01o0hzzm3nju',
-			center: [lng, lat],
-			zoom: window.innerWidth < 640 ? 0.5 : 3
-		});
-	}, []);
 
   return (
     <>
@@ -31,7 +49,115 @@ export default function MapPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-			<div ref={mapContainer} className="map-container w-full h-screen overflow-hidden"></div>
+			<ReactMapGL
+				mapLib={import('mapbox-gl')}
+				initialViewState={{
+					longitude: lng,
+					latitude: lat,
+					zoom: 1.25
+				}}
+				projection={{
+					name: 'globe'
+				}}
+				style={{width: '100%', height: '100dvh'}}
+				mapboxAccessToken={MAPBOX_TOKEN}
+				mapStyle="mapbox://styles/daishoarch/clnhcz2pr002l01nugl67fbde/draft"
+				ref={map}
+			>
+			</ReactMapGL>
+
+			{/* <div ref={map} className="map-container w-full h-screen overflow-hidden"></div> */}
+
+			<div className='flex flex-col gap-4 absolute bottom-4 left-4'>
+				<button className='btn circle flex-center' onClick={() => {
+						const clickedLayer = 'meteorites-b4vh7n';
+						 
+						const currMap = map.current?.getMap();
+
+						if(!currMap) return;
+
+						currMap.setLayoutProperty(clickedLayer, 'visibility', layer1Visible ? 'none' : 'visible');
+						setLayer1Visible(!layer1Visible);
+				}}>
+					Layer 1
+				</button>
+				<button className='btn circle flex-center' onClick={() => {
+					const currMap = map.current?.getMap();
+
+					if(!currMap) return;
+
+					if(!layer2Visible) {
+						const loadImages = [];
+
+						for(let i = 0; i < 16; i++) {
+							const loadImage = new Promise<HTMLImageElement | ImageBitmap>((resolve, reject) => {
+								currMap.loadImage(`/assets/icons/icons8-${i}.png`, (error, image) => {
+									if(error ?? !image) return reject(error);
+									return resolve(image);
+								});
+							})
+							loadImages.push(loadImage);
+						}
+
+						Promise.all(loadImages).then((loadedImages) => {
+							for(let i = 0; i < 100; i++) {
+								const randomIconIdx = Math.floor(Math.random() * loadedImages.length);
+								const coordinates = randomLngLat();
+								const name = `fish-${i}`;
+
+								const image = loadedImages[randomIconIdx];
+
+								if(!image) continue;
+
+
+								currMap.addImage(name, image);
+								currMap.addSource(name, {
+									type: 'geojson',
+									data: {
+										type: 'FeatureCollection',
+										features: [{
+											type: 'Feature',
+											geometry: {
+												type: 'Point',
+												coordinates
+											},
+											properties: {}
+										}]
+									}
+								});
+								
+								currMap.addLayer({
+									id: name,
+									type: 'symbol',
+									source: name,
+									layout: {
+										'icon-image': name,
+										'icon-size': 1.25
+									}
+								});
+							}
+						}).catch((error) => {
+							console.error(error);
+						});
+
+						setLayer2Visible(true);
+					} else {
+						for(let i = 0; i < 100; i++) {
+							const name = `fish-${i}`;
+							try {
+								currMap.removeLayer(name);
+								currMap.removeSource(name);
+								currMap.removeImage(name);
+							} catch (error) {
+								console.error(error);
+							}
+						}
+						setLayer2Visible(false);
+					}
+				}}>
+					Layer 2
+				</button>
+			</div>
 
 			<div className='flex flex-col gap-4 absolute bottom-4 right-4'>
 				<button className='btn circle flex-center' onClick={() => map.current?.zoomIn()}>

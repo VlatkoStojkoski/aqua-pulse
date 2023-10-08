@@ -7,7 +7,7 @@ export default function HomePage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-	await new Promise(res => res);
+	await new Promise(resolve => setTimeout(resolve, 50));
 
 	return {
 		redirect: {
