@@ -4,7 +4,7 @@ import mapboxgl, { type Map } from 'mapbox-gl';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiZGFpc2hvYXJjaCIsImEiOiJjbG13OW5keWMwOTRtMmtsMnN1YmtobmdtIn0.X1iVg56KI3O6tbUYFJmd5Q'
 
-export default function Home() {
+export default function MapPage() {
 	const mapContainer = useRef<HTMLDivElement>(null);
 	const map = useRef<Map | null>(null);
 	const [lng, setLng] = useState(-95.0992011);
@@ -31,17 +31,17 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-			<div ref={mapContainer} className="map-container w-full h-screen"></div>
+			<div ref={mapContainer} className="map-container w-full h-screen overflow-hidden"></div>
 
 			<div className='flex flex-col gap-4 absolute bottom-4 right-4'>
 				<button className='btn circle flex-center' onClick={() => map.current?.zoomIn()}>
 					<svg viewBox="0 0 24 24" fill="none" className='w-6 h-6' xmlns="http://www.w3.org/2000/svg">
-						<path d="M4 12H20M12 4V20" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M4 12H20M12 4V20" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
 					</svg>
 				</button>
 				<button className='btn circle flex-center' onClick={() => map.current?.zoomOut()}>
 					<svg viewBox="0 0 24 24" fill="none" className='w-6 h-6' xmlns="http://www.w3.org/2000/svg">
-						<path d="M6 12L18 12" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M6 12L18 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
 					</svg>
 				</button>
 			</div>

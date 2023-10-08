@@ -23,6 +23,74 @@ model Example {
   @@index([name])
 }
 
+model QuizQuestionAnswer {
+  id String @id @default(cuid())
+
+  content   String
+  isCorrect Boolean
+  order     Int     @default(autoincrement())
+
+  questionId String?
+  question   QuizQuestion? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizQuestion {
+  id String @id @default(cuid())
+
+  content  String
+  answers  QuizQuestionAnswer[]
+  sessions QuizSession[]
+
+  quizId String?
+  quiz   Quiz?   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  title        String
+  questions    QuizQuestion[]
+  cover        String?
+  quizSessions QuizSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuizSessionPlayer {
+  id String @id @default(cuid())
+
+  score Int @default(0)
+
+  quizSessionId String?
+  quizSession   QuizSession? @relation(fields: [quizSessionId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model QuizSession {
+  id   String @id @default(cuid())
+  code String @unique
+
+  isSingleplayer Boolean             @default(false)
+  players        QuizSessionPlayer[]
+
+  maxQuestions   Int @default(10)
+  questionNumber Int @default(0)
+
+  currentQuestionId String?
+  currentQuestion   QuizQuestion? @relation(fields: [currentQuestionId], references: [id], onDelete: Cascade)
+
+  quizId String?
+  quiz   Quiz?   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Necessary for Next auth
 model Account {
   id                String  @id @default(cuid())
@@ -51,13 +119,14 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String              @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?             @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
+  quizSessions  QuizSessionPlayer[]
 }
 
 model VerificationToken {

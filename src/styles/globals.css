@@ -18,4 +18,14 @@
 	.flex-center {
 		@apply flex justify-center items-center;
 	}
+
+	.bg-cover-center {
+		@apply bg-no-repeat bg-cover bg-center;
+	}
+}
+
+@layer components {
+	.card-lg {
+		@apply relative h-56 flex-center rounded-lg px-6;
+	}
 }
