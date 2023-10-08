@@ -89,9 +89,9 @@ export default function Navbar() {
 						</li>
 					</ul>
 
-					<button className="px-5 py-2 rounded-md bg-primary text-white text-2xl font-black items-center justify-center cursor-pointer">
+					<Link href='/get-started' className="px-5 py-2 rounded-md bg-primary text-white text-2xl font-black items-center justify-center cursor-pointer">
 						Get Started
-					</button>
+					</Link>
 				</div>
 			</div>
 		</>
