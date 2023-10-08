@@ -10,7 +10,11 @@ export default function QuizFinishPage () {
 
 	return (
 		<div className="flex flex-col w-full min-h-screen bg-neutral-900 text-white">
-			<Confetti width={width ?? 1000} height={height ?? 1000} className='fixed top-0 left-0 !-z-0 opacity-50' />
+			{
+				width && height && (
+					<Confetti width={width ?? 1000} height={height ?? 1000} className='fixed top-0 left-0 !-z-0 opacity-50' />
+				)
+			}
 			<div className="flex flex-grow items-center justify-center">
 				<h1 className='text-5xl font-extrabold font-heading'>CONGRATULATIONS!</h1>
 			</div>
