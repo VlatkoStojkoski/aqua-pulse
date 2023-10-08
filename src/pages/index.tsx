@@ -7,6 +7,8 @@ export default function HomePage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
+	await new Promise(res => res);
+
 	return {
 		redirect: {
 			permanent: false,
