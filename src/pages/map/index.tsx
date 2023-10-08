@@ -37,6 +37,7 @@ export default function MapPage() {
 	const map = useRef<MapRef | null>(null);
 	const [layer1Visible, setLayer1Visible] = useState(true);
 	const [layer2Visible, setLayer2Visible] = useState(false);
+	const [isLayersVisible, setIsLayersVisible] = useState(false);
 	const [lng, setLng] = useState(-95.0992011);
 	const [lat, setLat] = useState(29.5555885);
 
@@ -66,100 +67,116 @@ export default function MapPage() {
 			>
 			</ReactMapGL>
 
-			{/* <div ref={map} className="map-container w-full h-screen overflow-hidden"></div> */}
-
-			<div className='flex flex-col gap-4 absolute bottom-4 left-4'>
-				<button className='btn circle flex-center' onClick={() => {
-						const clickedLayer = 'meteorites-b4vh7n';
-						 
-						const currMap = map.current?.getMap();
-
-						if(!currMap) return;
-
-						currMap.setLayoutProperty(clickedLayer, 'visibility', layer1Visible ? 'none' : 'visible');
-						setLayer1Visible(!layer1Visible);
-				}}>
-					Layer 1
-				</button>
-				<button className='btn circle flex-center' onClick={() => {
-					const currMap = map.current?.getMap();
-
-					if(!currMap) return;
-
-					if(!layer2Visible) {
-						const loadImages = [];
-
-						for(let i = 0; i < 16; i++) {
-							const loadImage = new Promise<HTMLImageElement | ImageBitmap>((resolve, reject) => {
-								currMap.loadImage(`/assets/icons/icons8-${i}.png`, (error, image) => {
-									if(error ?? !image) return reject(error);
-									return resolve(image);
-								});
-							})
-							loadImages.push(loadImage);
-						}
-
-						Promise.all(loadImages).then((loadedImages) => {
-							for(let i = 0; i < 100; i++) {
-								const randomIconIdx = Math.floor(Math.random() * loadedImages.length);
-								const coordinates = randomLngLat();
-								const name = `fish-${i}`;
-
-								const image = loadedImages[randomIconIdx];
-
-								if(!image) continue;
-
-
-								currMap.addImage(name, image);
-								currMap.addSource(name, {
-									type: 'geojson',
-									data: {
-										type: 'FeatureCollection',
-										features: [{
-											type: 'Feature',
-											geometry: {
-												type: 'Point',
-												coordinates
-											},
-											properties: {}
-										}]
-									}
-								});
-								
-								currMap.addLayer({
-									id: name,
-									type: 'symbol',
-									source: name,
-									layout: {
-										'icon-image': name,
-										'icon-size': 1.25
-									}
-								});
-							}
-						}).catch((error) => {
-							console.error(error);
-						});
-
-						setLayer2Visible(true);
-					} else {
-						for(let i = 0; i < 100; i++) {
-							const name = `fish-${i}`;
-							try {
-								currMap.removeLayer(name);
-								currMap.removeSource(name);
-								currMap.removeImage(name);
-							} catch (error) {
-								console.error(error);
-							}
-						}
-						setLayer2Visible(false);
+			<div className={`absolute font-semibold text-md text-center right-4 bottom-4 transition-all ${isLayersVisible ? 'translate-y-0' : 'translate-y-[calc(100%-2rem)]'} p-6 pt-12 rounded-xl bg-neutral-900 text-white border-neutral-700 border-[1px] items-center justify-center`}>
+				<div className='flex justify-between items-center w-full left-0 top-3 px-3 absolute cursor-pointer' onClick={() => setIsLayersVisible(!isLayersVisible)}>
+					<p className="">
+						Layers
+					</p>
+					{
+						isLayersVisible ?
+							<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.61458 8.5L0.890493 2.77591C0.890491 2.77591 0.89049 2.77591 0.890488 2.77591C0.369839 2.25527 0.369837 1.41113 0.890484 0.890492C0.890487 0.890489 0.89049 0.890486 0.890493 0.890483M6.61458 8.5L0.890493 0.890483M6.61458 8.5L0.890506 14.224L0.890473 14.2241C0.369864 14.7448 0.369864 15.5888 0.890473 16.1095L0.890514 16.1095C1.41115 16.6302 2.25528 16.6302 2.77592 16.1095L2.77593 16.1095L8.49999 10.3854L14.2241 16.1095C14.7447 16.6302 15.5889 16.6302 16.1095 16.1095L16.1096 16.1095C16.6301 15.5888 16.6302 14.7448 16.1095 14.2241L10.3854 8.50001L16.1095 2.77591L16.1095 2.7759C16.6302 2.25526 16.6302 1.41114 16.1095 0.890496C15.5889 0.369833 14.7447 0.369834 14.2241 0.890501L8.49999 6.61459L2.77592 0.890492M6.61458 8.5L2.77592 0.890492M0.890493 0.890483C1.41114 0.369837 2.25527 0.369839 2.77591 0.890488M0.890493 0.890483L2.77591 0.890488M2.77591 0.890488C2.77591 0.89049 2.77591 0.890491 2.77592 0.890492M2.77591 0.890488L2.77592 0.890492" fill="white" stroke="white"/>
+							</svg> :
+							<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M1.3 8.04788L8.19418 11.6114C8.28798 11.6599 8.33489 11.6841 8.38408 11.6937C8.42762 11.7021 8.47238 11.7021 8.51593 11.6937C8.56512 11.6841 8.61202 11.6599 8.70583 11.6114L15.6 8.04788M1.3 4.3521L8.19418 0.788584C8.28798 0.740103 8.33489 0.715859 8.38408 0.706324C8.42762 0.697868 8.47238 0.697868 8.51593 0.706324C8.56512 0.715859 8.61202 0.740103 8.70583 0.788584L15.6 4.3521L8.70583 7.91565C8.61202 7.96414 8.56512 7.98838 8.51593 7.99791C8.47238 8.00634 8.42762 8.00634 8.38408 7.99791C8.33489 7.98838 8.28798 7.96414 8.19418 7.91565L1.3 4.3521Z" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
 					}
-				}}>
-					Layer 2
-				</button>
+				</div>
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={() => {
+							const clickedLayer = 'meteorites-b4vh7n';
+								
+							const currMap = map.current?.getMap();
+
+							if(!currMap) return;
+
+							currMap.setLayoutProperty(clickedLayer, 'visibility', layer1Visible ? 'none' : 'visible');
+							setLayer1Visible(!layer1Visible);
+						}}>
+						<Image src="/assets/img/heatmap.png" alt="heat-map" width={64} height={64} className="rounded-lg" />
+						Water Quality
+					</div>
+					<div className="flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={() => {
+							const currMap = map.current?.getMap();
+
+							if(!currMap) return;
+
+							if(!layer2Visible) {
+								const loadImages = [];
+
+								for(let i = 0; i < 16; i++) {
+									const loadImage = new Promise<HTMLImageElement | ImageBitmap>((resolve, reject) => {
+										currMap.loadImage(`/assets/icons/icons8-${i}.png`, (error, image) => {
+											if(error ?? !image) return reject(error);
+											return resolve(image);
+										});
+									})
+									loadImages.push(loadImage);
+								}
+
+								Promise.all(loadImages).then((loadedImages) => {
+									for(let i = 0; i < 100; i++) {
+										const randomIconIdx = Math.floor(Math.random() * loadedImages.length);
+										const coordinates = randomLngLat();
+										const name = `fish-${i}`;
+
+										const image = loadedImages[randomIconIdx];
+
+										if(!image) continue;
+
+
+										currMap.addImage(name, image);
+										currMap.addSource(name, {
+											type: 'geojson',
+											data: {
+												type: 'FeatureCollection',
+												features: [{
+													type: 'Feature',
+													geometry: {
+														type: 'Point',
+														coordinates
+													},
+													properties: {}
+												}]
+											}
+										});
+										
+										currMap.addLayer({
+											id: name,
+											type: 'symbol',
+											source: name,
+											layout: {
+												'icon-image': name,
+												'icon-size': 1.25
+											}
+										});
+									}
+								}).catch((error) => {
+									console.error(error);
+								});
+
+								setLayer2Visible(true);
+							} else {
+								for(let i = 0; i < 100; i++) {
+									const name = `fish-${i}`;
+									try {
+										currMap.removeLayer(name);
+										currMap.removeSource(name);
+										currMap.removeImage(name);
+									} catch (error) {
+										console.error(error);
+									}
+								}
+								setLayer2Visible(false);
+							}
+						}}>
+						<Image src="/assets/img/endangered-species.png" alt="Endangered Spices" width={64} height={64} className="rounded-lg" />
+						Endangered <br />Spices
+					</div>
+				</div>
 			</div>
 
-			<div className='flex flex-col gap-4 absolute bottom-4 right-4'>
+			{/* <div className='flex flex-col gap-4 absolute bottom-4 right-4'>
 				<button className='btn circle flex-center' onClick={() => map.current?.zoomIn()}>
 					<svg viewBox="0 0 24 24" fill="none" className='w-6 h-6' xmlns="http://www.w3.org/2000/svg">
 						<path d="M4 12H20M12 4V20" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -170,7 +187,7 @@ export default function MapPage() {
 						<path d="M6 12L18 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
 					</svg>
 				</button>
-			</div>
+			</div> */}
     </>
   );
 }
